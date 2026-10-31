@@ -23,7 +23,7 @@ sparse_csr_matrix_vector_multiplication(
     __global const uint* restrict values,
     __global const uint* restrict vector,
     __global uint* restrict result,
-    const int num_rows)
+    const uint num_rows)
 {
     const uint li = get_local_id(0);
     const uint lane = li & (SMALL_GROUP_SIZE - 1);
@@ -47,6 +47,8 @@ sparse_csr_matrix_vector_multiplication(
     }
 
     buf[li] = sum;
+    barrier(CLK_LOCAL_MEM_FENCE);
+
     const uint total = reduce(buf + group * SMALL_GROUP_SIZE, lane);
 
     if (lane == 0 && row < num_rows)
